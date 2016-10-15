@@ -20,9 +20,7 @@ def should_send(alert_id, limit=50):
     sql = 'SELECT tick FROM ALERTS WHERE id = ?'
     row = db.find_one(sql, (alert_id,))
     if (row is not None):
-        print('row found')
         if row[0] > limit:
-            print('returning false')
             return False
     return True
 
@@ -66,14 +64,15 @@ def sendNukeMessage(nukeinfo):
 
 
 def getBattleMessageText(battleinfo):
+    tick = screeps.get_time()
     room_name = battleinfo['_id']
     room_owner = screepmap.getRoomOwner(room_name)
-
+    message = str(tick) + ' - Battle: ' + room_name
     if not room_owner:
-        return 'Battle: ' + room_name
+        return message
 
     room_alliance = screepmap.getUserAlliance(room_owner)
-    message = 'Battle: ' + room_name + ', defender ' + room_owner
+    message += ', defender ' + room_owner
     if room_alliance:
         message += ' (' + room_alliance + ')'
 
@@ -85,7 +84,7 @@ def getNukeMessageText(nukeinfo):
     eta = str(nukeinfo['landTime']-tick)
     room_name = nukeinfo['room']
     room_owner = screepmap.getRoomOwner(room_name)
-    message = 'Nuke: ' + room_name + ' in ' + str(eta) + ' ticks'
+    message = str(tick) + ' - Nuke: ' + room_name + ' in ' + str(eta) + ' ticks'
 
     if not room_owner:
         message += ', abandoned'
@@ -103,7 +102,7 @@ def getNukeMessageText(nukeinfo):
 def sendToSlack(message):
     message = re.sub(r'([E|W][\d]+[N|S][\d]+)', addLinks, message, flags=re.IGNORECASE)
     channel = app.config['SLACK_CHANNEL']
-    slack.send_slack_message(channel, message)
+    #slack.send_slack_message(channel, message)
     print (message)
 
 
