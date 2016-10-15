@@ -74,6 +74,11 @@ def getBattleMessageText(battleinfo):
     if not room_owner:
         return message
 
+    room_level = screepmap.getRoomLevel(room_name)
+
+    if room_level and room_level > 0:
+        message += ' RCL ' + str(room_level)
+
     room_alliance = screepmap.getUserAlliance(room_owner)
     message += ', defender ' + room_owner
     if room_alliance:
