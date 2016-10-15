@@ -34,31 +34,25 @@ def clean():
     db.runQuery(sql, (tick_limit,))
 
 
-def sendBattleMessage(room):
-    room_name = room['_id']
-
+def sendBattleMessage(battleinfo):
+    room_name = battleinfo['_id']
     if not should_send(room_name, app.config['BATTLE_RATELIMIT']):
         return False
 
-    room_owner = screepmap.getRoomOwner(room_name)
-
-    if not room_owner:
-        sendToSlack('Battle in unowned room ' + room_name)
-        mark_sent(room_name)
-        return
-
-    room_alliance = screepmap.getUserAlliance(room_owner)
-    message = 'Battle in room ' + room_name + ' defended by ' + room_owner
-    if room_alliance:
-        message += ' of alliance ' + room_alliance
-
+    message = getBattleMessageText(battleinfo)
     sendToSlack(message)
     mark_sent(room_name)
+
+
 
 
 def sendNukeMessage(nukeinfo):
     tick = screeps.get_time()
     eta = nukeinfo['landTime']-tick
+    room_owner = screepmap.getRoomOwner(nukeinfo['room'])
+
+    if not room_owner:
+        return False
 
     if eta < 10:
         sendToSlack(getNukeMessageText(nukeinfo))
@@ -71,16 +65,38 @@ def sendNukeMessage(nukeinfo):
     mark_sent(nukeinfo['_id'])
 
 
+def getBattleMessageText(battleinfo):
+    room_name = battleinfo['_id']
+    room_owner = screepmap.getRoomOwner(room_name)
+
+    if not room_owner:
+        return 'Battle: ' + room_name
+
+    room_alliance = screepmap.getUserAlliance(room_owner)
+    message = 'Battle: ' + room_name + ', defender ' + room_owner
+    if room_alliance:
+        message += ' (' + room_alliance + ')'
+
+    return message
+
+
 def getNukeMessageText(nukeinfo):
     tick = screeps.get_time()
     eta = str(nukeinfo['landTime']-tick)
     room_name = nukeinfo['room']
     room_owner = screepmap.getRoomOwner(room_name)
-    room_alliance = screepmap.getUserAlliance(room_owner)
-    message = 'Nuke landing in ' + room_name + ' defended by ' + room_owner
-    if room_alliance:
-        message += ' of alliance ' + room_alliance
-    message += ' in ' + str(eta) + ' ticks'
+    message = 'Nuke: ' + room_name + ' in ' + str(eta) + ' ticks'
+
+    if not room_owner:
+        message += ', abandoned'
+    else:
+        room_alliance = screepmap.getUserAlliance(room_owner)
+        message += ', defender ' + room_owner
+        if room_alliance:
+            message += ' (' + room_alliance + ')'
+
+
+
     return message
 
 
