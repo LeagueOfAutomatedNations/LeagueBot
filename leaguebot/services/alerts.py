@@ -115,7 +115,7 @@ def addSlackLinks(matchobj):
 
 def sendToTwitter(message):
     message = re.sub(r'([E|W][\d]+[N|S][\d]+)', addTwitterLinks, message, flags=re.IGNORECASE)
-    message += ' #screeps'
+    message += ' #screeps_battles'
     twitter.send_twitter_message(message)
     print (message)
 
