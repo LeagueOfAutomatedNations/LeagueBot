@@ -5,6 +5,7 @@ import re
 import leaguebot.services.db as db
 import leaguebot.services.slack as slack
 import leaguebot.services.screeps as screeps
+import leaguebot.services.twitter as twitter
 
 
 
@@ -39,6 +40,7 @@ def sendBattleMessage(battleinfo):
 
     message = getBattleMessageText(battleinfo)
     sendToSlack(message)
+    sendToTwitter(message)
     mark_sent(room_name)
 
 
@@ -60,6 +62,7 @@ def sendNukeMessage(nukeinfo):
         return False
 
     sendToSlack(getNukeMessageText(nukeinfo))
+    sendToTwitter(getNukeMessageText(nukeinfo))
     mark_sent(nukeinfo['_id'])
 
 
@@ -100,12 +103,23 @@ def getNukeMessageText(nukeinfo):
 
 
 def sendToSlack(message):
-    message = re.sub(r'([E|W][\d]+[N|S][\d]+)', addLinks, message, flags=re.IGNORECASE)
+    message = re.sub(r'([E|W][\d]+[N|S][\d]+)', addSlackLinks, message, flags=re.IGNORECASE)
     channel = app.config['SLACK_CHANNEL']
-    slack.send_slack_message(channel, message)
+    # slack.send_slack_message(channel, message)
     print (message)
 
-
-def addLinks(matchobj):
+def addSlackLinks(matchobj):
     roomname = matchobj.group(1).upper()
     return '<https://screeps.com/a/#!/room/' + roomname + '|' + roomname + '>'
+
+
+def sendToTwitter(message):
+    message = re.sub(r'([E|W][\d]+[N|S][\d]+)', addTwitterLinks, message, flags=re.IGNORECASE)
+    message += ' #screeps'
+    twitter.send_twitter_message(message)
+    print (message)
+
+def addTwitterLinks(matchobj):
+    roomname = matchobj.group(1).upper()
+    return roomname + ' (https://screeps.com/a/#!/room/' + roomname + ')'
+
