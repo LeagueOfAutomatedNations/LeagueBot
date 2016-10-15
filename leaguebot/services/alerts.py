@@ -144,7 +144,7 @@ def addTwitterLinks(matchobj):
     roomname = matchobj.group(1).upper()
     baseurl = 'https://screeps.com/a/#!/room/' + roomname
     try:
-        shortener = Shortener('Isgd')
+        shortener = Shortener('Isgd', timeout=1)
         url = shortener.short(baseurl)
     except:
         url = baseurl
