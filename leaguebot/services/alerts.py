@@ -102,7 +102,7 @@ def getNukeMessageText(nukeinfo):
 def sendToSlack(message):
     message = re.sub(r'([E|W][\d]+[N|S][\d]+)', addLinks, message, flags=re.IGNORECASE)
     channel = app.config['SLACK_CHANNEL']
-    #slack.send_slack_message(channel, message)
+    slack.send_slack_message(channel, message)
     print (message)
 
 
