@@ -6,7 +6,7 @@ import leaguebot.services.db as db
 import leaguebot.services.slack as slack
 import leaguebot.services.screeps as screeps
 import leaguebot.services.twitter as twitter
-
+from pyshorteners import Shortener
 
 
 def mark_sent(alert_id):
@@ -108,10 +108,18 @@ def getNukeMessageText(nukeinfo):
 
 
 def sendToSlack(message):
-    message = re.sub(r'([E|W][\d]+[N|S][\d]+)', addSlackLinks, message, flags=re.IGNORECASE)
-    channel = app.config['SLACK_CHANNEL']
-    slack.send_slack_message(channel, message)
-    print (message)
+
+    if 'SEND_TO_SLACK' not in app.config or not app.config['SEND_TO_SLACK']:
+        return False
+
+    try:
+        message = re.sub(r'([E|W][\d]+[N|S][\d]+)', addSlackLinks, message, flags=re.IGNORECASE)
+        channel = app.config['SLACK_CHANNEL']
+        slack.send_slack_message(channel, message)
+        print (message)
+        return True
+    except:
+        return False
 
 def addSlackLinks(matchobj):
     roomname = matchobj.group(1).upper()
@@ -119,12 +127,25 @@ def addSlackLinks(matchobj):
 
 
 def sendToTwitter(message):
-    message = re.sub(r'([E|W][\d]+[N|S][\d]+)', addTwitterLinks, message, flags=re.IGNORECASE)
-    message += ' #screeps_battles'
-    twitter.send_twitter_message(message)
-    print (message)
+
+    if 'SEND_TO_TWITTER' not in app.config or not app.config['SEND_TO_TWITTER']:
+        return False
+
+    try:
+        message = re.sub(r'([E|W][\d]+[N|S][\d]+)', addTwitterLinks, message, flags=re.IGNORECASE)
+        message += ' #screeps_battles'
+        twitter.send_twitter_message(message)
+        print (message)
+        return True
+    except:
+        return False
 
 def addTwitterLinks(matchobj):
     roomname = matchobj.group(1).upper()
-    return roomname + ' (https://screeps.com/a/#!/room/' + roomname + ')'
-
+    baseurl = 'https://screeps.com/a/#!/room/' + roomname
+    try:
+        shortener = Shortener('Isgd')
+        url = shortener.short(baseurl)
+    except:
+        url = baseurl
+    return roomname + ' (' + url + ')'
