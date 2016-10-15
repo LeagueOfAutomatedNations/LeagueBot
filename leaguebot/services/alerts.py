@@ -14,9 +14,9 @@ def mark_sent(alert_id):
     db.runQuery(sql, (alert_id, tick))
 
 
-def should_send(alert_id):
+def should_send(alert_id, limit=50):
     tick = screeps.get_time()
-    limit = tick - 50
+    limit = tick - limit
     sql = 'SELECT tick FROM ALERTS WHERE id = ?'
     row = db.find_one(sql, (alert_id,))
     if (row is not None):
@@ -29,7 +29,7 @@ def should_send(alert_id):
 
 def clean():
     tick = screeps.get_time()
-    tick_limit = tick - 50
+    tick_limit = tick - 5000
     sql = 'DELETE FROM ALERTS WHERE tick < ?'
     db.runQuery(sql, (tick_limit,))
 
@@ -37,7 +37,7 @@ def clean():
 def sendBattleMessage(room):
     room_name = room['_id']
 
-    if not should_send(room_name):
+    if not should_send(room_name, app.config['BATTLE_RATELIMIT']):
         return False
 
     room_owner = screepmap.getRoomOwner(room_name)
@@ -64,7 +64,7 @@ def sendNukeMessage(nukeinfo):
         sendToSlack(getNukeMessageText(nukeinfo))
         return
 
-    if not should_send(nukeinfo['_id']):
+    if not should_send(nukeinfo['_id'], app.config['NUKE_RATELIMIT']):
         return False
 
     sendToSlack(getNukeMessageText(nukeinfo))
