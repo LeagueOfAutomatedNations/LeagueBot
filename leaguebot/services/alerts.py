@@ -50,7 +50,7 @@ def sendNukeMessage(nukeinfo):
     if not room_owner:
         return False
 
-    if eta < 10:
+    if eta < 25:
         leaguebot.services.alerters.slack.sendNukeMessage(nukeinfo)
         return
 
