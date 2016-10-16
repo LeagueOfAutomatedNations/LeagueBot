@@ -14,7 +14,7 @@ def getBattleMessageText(battleinfo):
     tick = screeps.get_time()
     room_name = battleinfo['_id']
     room_owner = screepmap.getRoomOwner(room_name)
-    message = str(tick) + ' - Battle: ' + room_name
+    message = str(tick) + ' - Battle: ' + '<https://screeps.com/a/#!/room/' + roomname + '|' + roomname + '>'
     if not room_owner:
         return message
 
@@ -23,8 +23,8 @@ def getBattleMessageText(battleinfo):
     if room_level and room_level > 0:
         message += ' RCL ' + str(room_level)
 
+    message += ', defender ' + '<https://screeps.com/a/#!/profile/' + room_owner + '|' + room_owner + '>'
     room_alliance = screepmap.getUserAlliance(room_owner)
-    message += ', defender ' + room_owner
     if room_alliance:
         message += ' (' + room_alliance + ')'
 
@@ -56,15 +56,9 @@ def sendToSlack(message):
     if 'SEND_TO_SLACK' not in app.config or not app.config['SEND_TO_SLACK']:
         return False
     try:
-        message = re.sub(r'([E|W][\d]+[N|S][\d]+)', addSlackLinks, message, flags=re.IGNORECASE)
         channel = app.config['SLACK_CHANNEL']
         slack.send_slack_message(channel, message)
         print (message)
         return True
     except:
         return False
-
-
-def addSlackLinks(matchobj):
-    roomname = matchobj.group(1).upper()
-    return '<https://screeps.com/a/#!/room/' + roomname + '|' + roomname + '>'
