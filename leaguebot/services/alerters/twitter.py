@@ -15,7 +15,7 @@ def getBattleMessageText(battleinfo):
     tick = screeps.get_time()
     room_name = battleinfo['_id']
     room_owner = screepmap.getRoomOwner(room_name)
-    message = str(tick) + ' - Battle: ' + room_name
+    message = 'Battle: ' + room_name
     if room_owner:
         room_level = screepmap.getRoomLevel(room_name)
         if room_level and room_level > 0:
@@ -39,7 +39,7 @@ def getNukeMessageText(nukeinfo):
     eta = str(nukeinfo['landTime']-tick)
     room_name = nukeinfo['room']
     room_owner = screepmap.getRoomOwner(room_name)
-    message = str(tick) + ' - Nuke: ' + room_name + ' in ' + str(eta) + ' ticks'
+    message = 'Nuke: ' + room_name + ' in ' + str(eta) + ' ticks'
 
     if not room_owner:
         message += ', abandoned'
