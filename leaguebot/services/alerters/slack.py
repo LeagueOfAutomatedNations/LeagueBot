@@ -11,10 +11,11 @@ def sendBattleMessage(battleinfo):
 
 
 def getBattleMessageText(battleinfo):
-    tick = screeps.get_time()
     room_name = battleinfo['_id']
     room_owner = screepmap.getRoomOwner(room_name)
-    message = str(tick) + ' - Battle: ' + '<https://screeps.com/a/#!/room/' + room_name + '|' + room_name + '>'
+    pvp_time = str(battleinfo['lastPvpTime'])
+    history_link = '<https://screeps.com/a/#!/history/E53N64?t=' + pvp_time + '|' + pvp_time + '>'
+    message = history_link + ' - Battle: ' + '<https://screeps.com/a/#!/room/' + room_name + '|' + room_name + '>'
     if not room_owner:
         return message
 

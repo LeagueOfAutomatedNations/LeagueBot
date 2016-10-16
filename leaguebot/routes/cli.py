@@ -10,12 +10,12 @@ import leaguebot.services.alerts as alerts
 def send_slack_alerts():
     battles = leaguebot.models.battles.get_battles()
     if battles:
-        for battle in battles['rooms']:
+        for battle in reversed(battles['rooms']):
             alerts.sendBattleMessage(battle)
 
     nukes = leaguebot.models.battles.get_nukes()
     if nukes:
-        for nuke in nukes:
+        for nuke in reversed(nukes):
             alerts.sendNukeMessage(nuke)
 
     click.echo('success')
