@@ -42,7 +42,7 @@ def getNukeMessageText(nukeinfo):
     eta = str(nukeinfo['landTime']-tick)
     room_name = nukeinfo['room']
     room_owner = screepmap.getRoomOwner(room_name)
-    message = str(tick) + ' - Nuke: ' + room_name + ' in ' + str(eta) + ' ticks'
+    message = str(tick) + ' - Nuke: ' + '<https://screeps.com/a/#!/room/' + room_name + '|' + room_name + '>' + ' in ' + str(eta) + ' ticks'
 
     if not room_owner:
         message += ', abandoned'
