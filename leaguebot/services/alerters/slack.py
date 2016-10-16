@@ -48,7 +48,7 @@ def getNukeMessageText(nukeinfo):
         message += ', abandoned'
     else:
         room_alliance = screepmap.getUserAlliance(room_owner)
-        message += ', defender ' + room_owner
+        message += ', defender ' + '<https://screeps.com/a/#!/profile/' + room_owner + '|' + room_owner + '>'
         if room_alliance:
             message += ' (' + room_alliance + ')'
     return message
