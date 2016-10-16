@@ -14,7 +14,7 @@ def getBattleMessageText(battleinfo):
     tick = screeps.get_time()
     room_name = battleinfo['_id']
     room_owner = screepmap.getRoomOwner(room_name)
-    message = str(tick) + ' - Battle: ' + '<https://screeps.com/a/#!/room/' + roomname + '|' + roomname + '>'
+    message = str(tick) + ' - Battle: ' + '<https://screeps.com/a/#!/room/' + room_name + '|' + room_name + '>'
     if not room_owner:
         return message
 
@@ -51,6 +51,7 @@ def getNukeMessageText(nukeinfo):
         if room_alliance:
             message += ' (' + room_alliance + ')'
     return message
+
 
 def sendToSlack(message):
     if 'SEND_TO_SLACK' not in app.config or not app.config['SEND_TO_SLACK']:
