@@ -55,7 +55,7 @@ def getNukeMessageText(nukeinfo):
     date_early = now + datetime.timedelta(seconds = eta_early)
     date_late = now + datetime.timedelta(seconds = eta_late)
 
-    message += ' ( between ' + date_early.strftime("%Y-%m-%d %H:%M") + ' to ' + date_late.strftime("%Y-%m-%d %H:%M %Z") + ')'
+    message += ' (between ' + date_early.strftime("%Y-%m-%d %H:%M") + ' to ' + date_late.strftime("%Y-%m-%d %H:%M %Z") + ')'
 
     if not room_owner:
         message += ', abandoned'
