@@ -3,9 +3,11 @@ import leaguebot.models.map as screepmap
 import leaguebot.services.screeps as screeps
 import leaguebot.services.slack as slack
 import re
+import datetime
 
 
 def sendBattleMessage(battleinfo):
+    return
     message = getBattleMessageText(battleinfo)
     sendToSlack(message)
 
@@ -39,10 +41,21 @@ def sendNukeMessage(nukeinfo):
 
 def getNukeMessageText(nukeinfo):
     tick = screeps.get_time()
-    eta = str(nukeinfo['landTime']-tick)
+    eta = nukeinfo['landTime']-tick
     room_name = nukeinfo['room']
     room_owner = screepmap.getRoomOwner(room_name)
     message = str(tick) + ' - Nuke: ' + '<https://screeps.com/a/#!/room/' + room_name + '|' + room_name + '>' + ' in ' + str(eta) + ' ticks'
+
+    eta_seconds = eta * 3
+    diff = eta_seconds * 0.01
+    eta_early = eta_seconds - diff
+    eta_late = eta_seconds + diff
+
+    now = datetime.datetime.now()
+    date_early = now + datetime.timedelta(seconds = eta_early)
+    date_late = now + datetime.timedelta(seconds = eta_late)
+
+    message += ' ( between ' + date_early.strftime("%Y-%m-%d %H:%M") + ' to ' + date_late.strftime("%Y-%m-%d %H:%M %Z") + ')'
 
     if not room_owner:
         message += ', abandoned'
