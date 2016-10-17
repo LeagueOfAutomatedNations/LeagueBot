@@ -4,10 +4,10 @@ import leaguebot.services.screeps as screeps
 import leaguebot.services.slack as slack
 import re
 import datetime
+import pytz
 
 
 def sendBattleMessage(battleinfo):
-    return
     message = getBattleMessageText(battleinfo)
     sendToSlack(message)
 
@@ -51,7 +51,7 @@ def getNukeMessageText(nukeinfo):
     eta_early = eta_seconds - diff
     eta_late = eta_seconds + diff
 
-    now = datetime.datetime.now()
+    now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
     date_early = now + datetime.timedelta(seconds = eta_early)
     date_late = now + datetime.timedelta(seconds = eta_late)
 
