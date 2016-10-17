@@ -25,7 +25,7 @@ def getBattleMessageText(battleinfo):
         if room_alliance:
             message += ' (' + room_alliance + ')'
 
-    message += ' ' + getRoomLink(room_name)
+    message += ' ' + getHistoryLink(room_name, str(battleinfo['lastPvpTime']))
     return message
 
 
@@ -70,6 +70,16 @@ def sendToTwitter(message):
 
 def getRoomLink(roomname):
     baseurl = 'https://screeps.com/a/#!/room/' + roomname
+    return getShortenedLink(baseurl)
+
+
+def getHistoryLink(roomname, tick):
+    tick = str(int(tick)-50)
+    history_link = 'https://screeps.com/a/#!/history/' + roomname + '?t=' + tick
+    return getShortenedLink(history_link)
+
+
+def getShortenedLink(baseurl):
     try:
         shortener = Shortener('Isgd', timeout=3)
         url = shortener.short(baseurl)
