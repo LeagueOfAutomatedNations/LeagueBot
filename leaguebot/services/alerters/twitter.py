@@ -49,8 +49,8 @@ def getNukeMessageText(nukeinfo):
         if room_alliance:
             message += ' (' + room_alliance + ')'
 
-
     message += ' ' + getRoomLink(room_name)
+    message += ' #screeps_nuke'
     return message
 
 
