@@ -6,6 +6,7 @@ import leaguebot.services.db as db
 import leaguebot.services.screeps as screeps
 import leaguebot.services.alerters.twitter
 import leaguebot.services.alerters.slack
+from leaguebot.services import battle_description
 
 
 def mark_sent(alert_id):
@@ -32,14 +33,10 @@ def clean():
     db.runQuery(sql, (tick_limit,))
 
 
-def sendBattleMessage(battleinfo):
-    room_name = battleinfo['_id']
-    if not should_send(room_name, app.config['BATTLE_RATELIMIT']):
-        return False
-
-    leaguebot.services.alerters.slack.sendBattleMessage(battleinfo)
-    leaguebot.services.alerters.twitter.sendBattleMessage(battleinfo)
-    mark_sent(room_name)
+def sendBattleMessage(battle_data):
+    success = leaguebot.services.alerters.slack.sendBattleMessage(battle_data)
+    success = leaguebot.services.alerters.twitter.sendBattleMessage(battle_data) and success
+    return success
 
 
 def sendNukeMessage(nukeinfo):

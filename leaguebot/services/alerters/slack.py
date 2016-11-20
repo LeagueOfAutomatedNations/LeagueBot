@@ -1,37 +1,32 @@
-from leaguebot import app
-import leaguebot.models.map as screepmap
-import leaguebot.services.screeps as screeps
-import leaguebot.services.slack as slack
-import re
 import datetime
+
 import pytz
 
+import leaguebot.models.map as screepmap
+from leaguebot import app
+from leaguebot.services import screeps, slack, battle_description
 
-def sendBattleMessage(battleinfo):
-    message = getBattleMessageText(battleinfo)
-    sendToSlack(message)
+
+def sendBattleMessage(battle_data):
+    message = getBattleMessageText(battle_data)
+    return sendToSlack(message)
 
 
-def getBattleMessageText(battleinfo):
-    room_name = battleinfo['_id']
-    room_owner = screepmap.getRoomOwner(room_name)
-    pvp_time = str(battleinfo['lastPvpTime']-20)
-    history_link = '<https://screeps.com/a/#!/history/' + room_name + '?t=' + pvp_time + '|' + pvp_time + '>'
-    message = history_link + ' - Battle: ' + '<https://screeps.com/a/#!/room/' + room_name + '|' + room_name + '>'
-    if not room_owner:
-        return message
+def getBattleMessageText(battle_data):
+    room_name = battle_data['room']
+    pvp_time = battle_data['earliest_hostilities_detected'] - 5
 
-    room_level = screepmap.getRoomLevel(room_name)
-
-    if room_level and room_level > 0:
-        message += ' RCL ' + str(room_level)
-
-    message += ', defender ' + '<https://screeps.com/a/#!/profile/' + room_owner + '|' + room_owner + '>'
-    room_alliance = screepmap.getUserAlliance(room_owner)
-    if room_alliance:
-        message += ' (' + room_alliance + ')'
-
-    return message
+    history_link = "<https://screeps.com/a/#!/history/{0}?t={1}|{0} at {1}>".format(room_name, pvp_time)
+    return "{} - {} tick battle: {} - {}{}".format(
+        " vs ".join(
+            "<https://screeps.com/a/#!/profile/{0}|{0}{1}>"
+                .format(username, " ({})".format(alliance) if alliance is not None else "")
+            for username, alliance in battle_data['alliances'].items()),
+        battle_description.describe_duration(battle_data),
+        battle_description.describe_creeps(battle_data),
+        history_link,
+        "({}, RCL {})".format(battle_data['owner'], battle_data['rcl']) if battle_data.get('rcl') else ""
+    )
 
 
 def sendNukeMessage(nukeinfo):
@@ -41,10 +36,12 @@ def sendNukeMessage(nukeinfo):
 
 def getNukeMessageText(nukeinfo):
     tick = screeps.get_time()
-    eta = nukeinfo['landTime']-tick
+    eta = nukeinfo['landTime'] - tick
     room_name = nukeinfo['room']
     room_owner = screepmap.getRoomOwner(room_name)
-    message = str(tick) + ' - Nuke: ' + '<https://screeps.com/a/#!/room/' + room_name + '|' + room_name + '>' + ' in ' + str(eta) + ' ticks'
+    message = str(
+        tick) + ' - Nuke: ' + '<https://screeps.com/a/#!/room/' + room_name + '|' + room_name + '>' + ' in ' + str(
+        eta) + ' ticks'
 
     eta_seconds = eta * 3
     diff = eta_seconds * 0.01
@@ -52,10 +49,11 @@ def getNukeMessageText(nukeinfo):
     eta_late = eta_seconds + diff
 
     now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
-    date_early = now + datetime.timedelta(seconds = eta_early)
-    date_late = now + datetime.timedelta(seconds = eta_late)
+    date_early = now + datetime.timedelta(seconds=eta_early)
+    date_late = now + datetime.timedelta(seconds=eta_late)
 
-    message += ' (between ' + date_early.strftime("%Y-%m-%d %H:%M") + ' to ' + date_late.strftime("%Y-%m-%d %H:%M %Z") + ')'
+    message += ' (between ' + date_early.strftime("%Y-%m-%d %H:%M") + ' to ' + date_late.strftime(
+        "%Y-%m-%d %H:%M %Z") + ')'
 
     if not room_owner:
         message += ', abandoned'
@@ -72,8 +70,8 @@ def sendToSlack(message):
         return False
     try:
         channel = app.config['SLACK_CHANNEL']
-        slack.send_slack_message(channel, message)
-        print (message)
-        return True
+        success = slack.send_slack_message(channel, message)
+        print(message)
+        return success
     except:
         return False

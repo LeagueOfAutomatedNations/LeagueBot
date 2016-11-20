@@ -1,32 +1,27 @@
-from leaguebot import app
-import leaguebot.models.map as screepmap
-import leaguebot.services.screeps as screeps
-import leaguebot.services.twitter as twitter
-import re
 from pyshorteners import Shortener
 
+import leaguebot.models.map as screepmap
+from leaguebot import app
+from leaguebot.services import screeps, twitter, battle_description
 
-def sendBattleMessage(battleinfo):
-    message = getBattleMessageText(battleinfo)
-    sendToTwitter(message)
+
+def sendBattleMessage(battle_data):
+    message = getBattleMessageText(battle_data)
+    return sendToTwitter(message)
 
 
-def getBattleMessageText(battleinfo):
-    tick = screeps.get_time()
-    room_name = battleinfo['_id']
-    room_owner = screepmap.getRoomOwner(room_name)
-    message = 'Battle: ' + room_name
-    if room_owner:
-        room_level = screepmap.getRoomLevel(room_name)
-        if room_level and room_level > 0:
-            message += ' RCL ' + str(room_level)
-        room_alliance = screepmap.getUserAlliance(room_owner)
-        message += ', defender ' + room_owner
-        if room_alliance:
-            message += ' (' + room_alliance + ')'
+def getBattleMessageText(battle_data):
+    room_name = battle_data['room']
+    pvp_time = battle_data['earliest_hostilities_detected'] - 5
 
-    message += ' ' + getHistoryLink(room_name, str(battleinfo['lastPvpTime']))
-    return message
+    history_link = getHistoryLink(room_name, pvp_time)
+    return "Battle: {} - lasted {} ticks in {}. {}".format(
+        " vs ".join("{}{}".format(username, " ({})".format(alliance) if alliance is not None else "")
+                    for username, alliance in battle_data['alliances'].items()),
+        battle_description.describe_duration(battle_data),
+        battle_data['room'],
+        history_link,
+    )
 
 
 def sendNukeMessage(nukeinfo):
@@ -36,7 +31,7 @@ def sendNukeMessage(nukeinfo):
 
 def getNukeMessageText(nukeinfo):
     tick = screeps.get_time()
-    eta = str(nukeinfo['landTime']-tick)
+    eta = str(nukeinfo['landTime'] - tick)
     room_name = nukeinfo['room']
     room_owner = screepmap.getRoomOwner(room_name)
     message = 'Nuke: ' + room_name + ' in ' + str(eta) + ' ticks'
@@ -55,14 +50,13 @@ def getNukeMessageText(nukeinfo):
 
 
 def sendToTwitter(message):
-
     if 'SEND_TO_TWITTER' not in app.config or not app.config['SEND_TO_TWITTER']:
         return False
 
     try:
         message += ' #screeps_battles'
         twitter.send_twitter_message(message)
-        print (message)
+        print(message)
         return True
     except:
         return False
@@ -74,7 +68,7 @@ def getRoomLink(roomname):
 
 
 def getHistoryLink(roomname, tick):
-    tick = str(int(tick)-50)
+    tick = str(int(tick) - 50)
     history_link = 'https://screeps.com/a/#!/history/' + roomname + '?t=' + tick
     return getShortenedLink(history_link)
 

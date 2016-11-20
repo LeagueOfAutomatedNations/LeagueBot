@@ -88,5 +88,8 @@ ENV/
 # Rope project settings
 .ropeproject
 
+# Idea project settings
+.idea
+
 /settings
 .vagrant
