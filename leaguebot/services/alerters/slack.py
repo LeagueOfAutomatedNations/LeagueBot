@@ -36,12 +36,10 @@ def sendNukeMessage(nukeinfo):
 
 def getNukeMessageText(nukeinfo):
     tick = screeps.get_time()
-    eta = nukeinfo['landTime'] - tick
+    eta = nukeinfo['landTime']-tick
     room_name = nukeinfo['room']
     room_owner = screepmap.getRoomOwner(room_name)
-    message = str(
-        tick) + ' - Nuke: ' + '<https://screeps.com/a/#!/room/' + room_name + '|' + room_name + '>' + ' in ' + str(
-        eta) + ' ticks'
+    message = str(tick) + ' - Nuke: ' + '<https://screeps.com/a/#!/room/' + room_name + '|' + room_name + '>' + ' in ' + str(eta) + ' ticks'
 
     eta_seconds = eta * 3
     diff = eta_seconds * 0.01
@@ -49,11 +47,10 @@ def getNukeMessageText(nukeinfo):
     eta_late = eta_seconds + diff
 
     now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
-    date_early = now + datetime.timedelta(seconds=eta_early)
-    date_late = now + datetime.timedelta(seconds=eta_late)
+    date_early = now + datetime.timedelta(seconds = eta_early)
+    date_late = now + datetime.timedelta(seconds = eta_late)
 
-    message += ' (between ' + date_early.strftime("%Y-%m-%d %H:%M") + ' to ' + date_late.strftime(
-        "%Y-%m-%d %H:%M %Z") + ')'
+    message += ' (between ' + date_early.strftime("%Y-%m-%d %H:%M") + ' to ' + date_late.strftime("%Y-%m-%d %H:%M %Z") + ')'
 
     if not room_owner:
         message += ', abandoned'

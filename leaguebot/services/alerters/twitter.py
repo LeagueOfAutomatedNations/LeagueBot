@@ -31,7 +31,7 @@ def sendNukeMessage(nukeinfo):
 
 def getNukeMessageText(nukeinfo):
     tick = screeps.get_time()
-    eta = str(nukeinfo['landTime'] - tick)
+    eta = str(nukeinfo['landTime']-tick)
     room_name = nukeinfo['room']
     room_owner = screepmap.getRoomOwner(room_name)
     message = 'Nuke: ' + room_name + ' in ' + str(eta) + ' ticks'
@@ -50,13 +50,14 @@ def getNukeMessageText(nukeinfo):
 
 
 def sendToTwitter(message):
+
     if 'SEND_TO_TWITTER' not in app.config or not app.config['SEND_TO_TWITTER']:
         return False
 
     try:
         message += ' #screeps_battles'
         twitter.send_twitter_message(message)
-        print(message)
+        print (message)
         return True
     except:
         return False
@@ -68,7 +69,7 @@ def getRoomLink(roomname):
 
 
 def getHistoryLink(roomname, tick):
-    tick = str(int(tick) - 50)
+    tick = str(int(tick)-50)
     history_link = 'https://screeps.com/a/#!/history/' + roomname + '?t=' + tick
     return getShortenedLink(history_link)
 

@@ -1,6 +1,6 @@
 from slackclient import SlackClient
-
 from leaguebot import app
+
 
 SLACK_TOKEN = app.config['SLACK_TOKEN']
 slack_client = SlackClient(SLACK_TOKEN)
