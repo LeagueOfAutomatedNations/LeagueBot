@@ -1,5 +1,3 @@
-import asyncio
-
 import click
 
 import leaguebot.models.battles
@@ -25,20 +23,3 @@ def send_slack_alerts():
     click.echo("Reporting any finished battles.")
     reporting.report_pending_battles()
     click.echo('success')
-
-
-@app.cli.command()
-def run_server():
-    logger.debug("Started main loop.")
-    loop = asyncio.get_event_loop()
-
-    gathered_future = asyncio.gather(
-        battles.check_and_queue_battles_continuously(loop),
-        history.continuously_processes_battles(loop),
-        reporting.reporting_loop(loop),
-        loop=loop,
-    )
-    try:
-        loop.run_until_complete(gathered_future)
-    finally:
-        loop.close()

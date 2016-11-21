@@ -1,5 +1,3 @@
-import asyncio
-
 from leaguebot import app
 from leaguebot.services import redis_queue, alerts
 from leaguebot.static_constants import civilian, scout
@@ -17,28 +15,6 @@ def should_report(battle_info):
 
 
 logger = app.logger
-
-
-@asyncio.coroutine
-def reporting_loop(loop):
-    """
-    :type loop: asyncio.events.AbstractEventLoop
-    """
-    while True:
-        battle_data, database_key = yield from loop.run_in_executor(None, redis_queue.get_next_battle_to_report)
-
-        if should_report(battle_data):
-            success = yield from loop.run_in_executor(None, alerts.sendBattleMessage, battle_data)
-            if not success:
-                logger.debug("Successfully reported battle in {}.".format(battle_data['room']))
-                yield from loop.run_in_executor(None, redis_queue.mark_battle_reported, database_key)
-            else:
-                logger.debug("Failed to reported battle in {}.".format(battle_data['room']))
-                # Try again with the next battle to report in 30 seconds.
-                yield from asyncio.sleep(30, loop=loop)
-        else:
-            logger.debug("Decided not to report battle in {}.".format(battle_data['room']))
-            yield from loop.run_in_executor(None, redis_queue.mark_battle_reported, database_key)
 
 
 def report_pending_battles():

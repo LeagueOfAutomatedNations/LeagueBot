@@ -1,7 +1,4 @@
-import asyncio
-
 import requests
-from functools import partial
 from requests.packages.urllib3.exceptions import NewConnectionError
 
 from leaguebot import app
@@ -362,34 +359,3 @@ def process_all_pending_battles_once():
         logger.debug("Processed {}: submitting to reporting queue!".format(room_name))
 
         redis_queue.submit_processed_battle(room_name, battle_data)
-
-
-@asyncio.coroutine
-def continuously_processes_battles(loop):
-    """
-
-    :type loop: asyncio.events.AbstractEventLoop
-    """
-    while True:
-        room_name = yield from loop.run_in_executor(None, partial(redis_queue.get_next_room_to_process,
-                                                                  blocking=True))
-
-        latest_tick = yield from loop.run_in_executor(None, redis_data.get_latest_fetched_tick)
-        if latest_tick:
-            latest_tick = int(latest_tick.decode())
-        else:
-            latest_tick = 0
-
-        battle_data = yield from loop.run_in_executor(None, partial(process_room, room_name, latest_tick))
-
-        if battle_data is None:
-            # If we continue without sending queuing a finished battle, the battle will simply be sent to the back of
-            # the processing queue. This way, we'll keep checking to see if we have any history parts available every 30
-            # seconds, and if we have multiple battles which aren't in order, we'll still get to all of them in good
-            # time.
-            yield from asyncio.sleep(30, loop=loop)
-            continue
-
-        logger.debug("Processed {}: submitting to reporting queue!".format(room_name))
-
-        yield from loop.run_in_executor(None, redis_queue.submit_processed_battle, room_name, battle_data)
