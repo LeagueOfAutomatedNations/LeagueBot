@@ -52,8 +52,7 @@ def getNukeMessageText(nukeinfo):
 def sendToTwitter(message):
 
     if 'SEND_TO_TWITTER' not in app.config or not app.config['SEND_TO_TWITTER']:
-        return False
-
+        return True
     try:
         message += ' #screeps_battles'
         twitter.send_twitter_message(message)

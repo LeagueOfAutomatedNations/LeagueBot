@@ -1,12 +1,11 @@
 
 from leaguebot import app
 import leaguebot.models.map as screepmap
-import re
 import leaguebot.services.db as db
 import leaguebot.services.screeps as screeps
 import leaguebot.services.alerters.twitter
 import leaguebot.services.alerters.slack
-from leaguebot.services import battle_description
+import leaguebot.services.alerters.cli
 
 
 def mark_sent(alert_id):
@@ -36,6 +35,7 @@ def clean():
 def sendBattleMessage(battle_data):
     success = leaguebot.services.alerters.slack.sendBattleMessage(battle_data)
     success = leaguebot.services.alerters.twitter.sendBattleMessage(battle_data) and success
+    success = leaguebot.services.alerters.cli.sendBattleMessage(battle_data) and success
     return success
 
 

@@ -25,7 +25,7 @@ def getBattleMessageText(battle_data):
         battle_description.describe_duration(battle_data),
         battle_description.describe_creeps(battle_data),
         history_link,
-        "({}, RCL {})".format(battle_data['owner'], battle_data['rcl']) if battle_data.get('rcl') else ""
+        " (defender {}, RCL {})".format(battle_data['owner'], battle_data['rcl']) if battle_data.get('rcl') else ""
     )
 
 
@@ -64,7 +64,7 @@ def getNukeMessageText(nukeinfo):
 
 def sendToSlack(message):
     if 'SEND_TO_SLACK' not in app.config or not app.config['SEND_TO_SLACK']:
-        return False
+        return True
     try:
         channel = app.config['SLACK_CHANNEL']
         success = slack.send_slack_message(channel, message)
