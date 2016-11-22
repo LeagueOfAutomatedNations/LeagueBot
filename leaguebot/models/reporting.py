@@ -35,7 +35,7 @@ def report_pending_battles():
             if success:
                 logger.debug("Successfully reported battle in {}.".format(battle_data['room']))
                 redis_queue.mark_battle_reported(database_key)
-            else:
+            elif first_failure is None:
                 logger.debug("Failed to reported battle in {}.".format(battle_data['room']))
                 first_failure = battle_data['room']
         else:
