@@ -8,8 +8,9 @@ from leaguebot.services import screeps, battle_description
 
 
 def sendBattleMessage(battle_data):
-    message = getBattleMessageText(battle_data)
-    app.logger.info(message)
+    if 'SEND_TO_CLI' in app.config and app.config['SEND_TO_CLI']:
+        message = getBattleMessageText(battle_data)
+        app.logger.info(message)
     return True
 
 
@@ -30,8 +31,9 @@ def getBattleMessageText(battle_data):
 
 
 def sendNukeMessage(nukeinfo):
-    message = getNukeMessageText(nukeinfo)
-    app.logger.info(message)
+    if 'SEND_TO_CLI' in app.config and app.config['SEND_TO_CLI']:
+        message = getNukeMessageText(nukeinfo)
+        app.logger.info(message)
     return True
 
 
