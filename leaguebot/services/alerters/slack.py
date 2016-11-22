@@ -46,8 +46,8 @@ def getNukeMessageText(nukeinfo):
     room_owner = screepmap.getRoomOwner(room_name)
     message = str(tick) + ' - Nuke: ' + '<https://screeps.com/a/#!/room/' + room_name + '|' + room_name + '>' + ' in ' + str(eta) + ' ticks'
 
-    eta_seconds = eta * 3
-    diff = eta_seconds * 0.01
+    eta_seconds = eta * 3.5
+    diff = eta_seconds * 0.2
     eta_early = eta_seconds - diff
     eta_late = eta_seconds + diff
 
