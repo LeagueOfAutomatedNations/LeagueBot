@@ -26,8 +26,8 @@ def _setup_logger():
             },
         },
         "loggers": {
-            "warreport": {
-                "level": "INFO",
+            app.logger_name: {
+                "level": "DEBUG" if app.config.get("DEBUG_LOGGING") else "INFO",
                 "handlers": ["console"]
             }
         }

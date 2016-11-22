@@ -68,7 +68,7 @@ def sendToSlack(message):
     try:
         channel = app.config['SLACK_CHANNEL']
         success = slack.send_slack_message(channel, message)
-        print(message)
+        app.logger.info("Sent slack message: {}".format(message))
         return success
     except:
         return False

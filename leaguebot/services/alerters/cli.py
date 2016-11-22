@@ -1,15 +1,15 @@
 import datetime
 
-import click
 import pytz
 
 import leaguebot.models.map as screepmap
+from leaguebot import app
 from leaguebot.services import screeps, battle_description
 
 
 def sendBattleMessage(battle_data):
     message = getBattleMessageText(battle_data)
-    click.echo(message)
+    app.logger.info(message)
     return True
 
 
@@ -31,7 +31,7 @@ def getBattleMessageText(battle_data):
 
 def sendNukeMessage(nukeinfo):
     message = getNukeMessageText(nukeinfo)
-    click.echo(message)
+    app.logger.info(message)
     return True
 
 

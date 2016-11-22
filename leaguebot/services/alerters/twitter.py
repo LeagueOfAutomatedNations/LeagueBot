@@ -56,7 +56,7 @@ def sendToTwitter(message):
     try:
         message += ' #screeps_battles'
         twitter.send_twitter_message(message)
-        print (message)
+        app.logger.info("Sent twitter message: {}".format(message))
         return True
     except:
         return False
