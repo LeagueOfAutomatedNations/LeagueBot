@@ -9,7 +9,7 @@ from leaguebot import app
 from leaguebot.services import redis_data
 from leaguebot.static_constants import PROCESSING_QUEUE_SET, PROCESSING_QUEUE, REPORTING_QUEUE, BATTLE_DATA_EXPIRE, \
     BATTLE_DATA_KEY, KEEP_IN_QUEUE_FOR_MAX_TICKS, ROOM_LAST_BATTLE_END_TICK_KEY, ROOM_LAST_BATTLE_END_TICK_EXPIRE, \
-    LAST_CHECKED_TICK_KEY, LAST_CHECKED_TICK_EXPIRE
+    LAST_CHECKED_TICK_KEY, LAST_CHECKED_TICK_EXPIRE, TWITTER_QUEUE, SLACK_QUEUE
 
 logger = app.logger
 
@@ -99,7 +99,7 @@ def submit_processed_battle(room_name, battle_info_dict):
         # This means something has gone wrong, and no hostilities have been detected!
         # We should still remove this battle from the queue, as it was deemed 'unprocessable' by screeps_info,
         # but we shouldn't add it to the reporting queue since it wasn't processed!
-        logger.warning("Battle submitted with no hostilities - not reporting battle in {}! {}".format(
+        logger.debug("Battle submitted with no hostilities - not reporting battle in {}! {}".format(
             room_name, battle_info_dict))
     pipe.execute()
 
@@ -137,3 +137,71 @@ def mark_battle_reported(database_key):
                          successfully reported.
     """
     redis_data.get_connection().lrem(REPORTING_QUEUE, -1, database_key)
+
+
+def requeue_report(reporting_database_key, push_to_twitter, push_to_slack):
+    """
+    Requeues a battle from the main reporting queue into the twitter or slack queues.
+
+    Might be just slightly overengineered, but with this format there won't ever be any repeated work and all messages
+    will be reported exactly once.
+
+    :param reporting_database_key: The database key gotten from get_next_battle_to_report - for removing from the main
+            reporting queue.
+    :param push_to_twitter: A single string to push to the twitter queue.
+    :param push_to_slack: A single string to push to the slack queue.
+    """
+    pipeline = redis_data.get_connection().pipeline()
+    if reporting_database_key:
+        pipeline.lrem(REPORTING_QUEUE, -1, reporting_database_key)
+    if push_to_twitter:
+        pipeline.lpush(TWITTER_QUEUE, push_to_twitter)
+    if push_to_slack:
+        pipeline.lpush(SLACK_QUEUE, push_to_slack)
+    pipeline.execute()
+
+
+# This is a small LUA script to merge all of the items in the slack queue into one item. It's done as a LUA script
+# instead of python code in order to make it a single operation.
+# The first key should be the queue to merge
+# The first argument should be the separator to use when merging.
+# TODO: should we have a limit for how many messages we merge together / the length of the message?
+_slack_merge_script = redis.client.Script(None, """
+local elements = redis.call('lrange', KEYS[1], 0, -1) -- Get all elements
+local merged = table.concat(elements, ARGV[1]) -- Merge
+redis.call('del', KEYS[1]) -- Delete all values
+redis.call('lpush', KEYS[1], merged) -- Insert the merged element
+""")
+
+
+def merge_slack_queue():
+    """
+    Merges all current messages in the slack queue into one message.
+    """
+    _slack_merge_script(
+        keys=[SLACK_QUEUE],
+        args=['\n\n'],
+        client=redis_data.get_connection()
+    )
+
+
+def pull_reportable_message(reporting_key):
+    """
+    Pulls a raw string message to report
+    :param reporting_key: SLACK_QUEUE or TWITTER_QUEUE
+    :return: A string message
+    """
+    raw = redis_data.get_connection().rpoplpush(reporting_key, reporting_key)
+    if raw is None:
+        return None
+    else:
+        return raw.decode()
+
+
+def finish_reportable_message(reporting_key, message):
+    """
+    Marks a raw string message as reported.
+    :param reporting_key: SLACK_QUEUE or TWITTER_QUEUE
+    :param message: The message to mark finished.
+    """
+    redis_data.get_connection().lrem(reporting_key, message, 1)

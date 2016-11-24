@@ -22,4 +22,6 @@ def send_slack_alerts():
     history.process_all_pending_battles_once()
     logger.info("Reporting any finished battles.")
     reporting.report_pending_battles()
+    reporting.send_slack_messages()
+    reporting.send_twitter_messages()
     click.echo('success')
