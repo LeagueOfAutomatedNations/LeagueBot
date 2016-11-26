@@ -20,7 +20,7 @@ def check_and_queue_battles_once():
     if last_grabbed_tick:
         battles = get_battles(since_tick=last_grabbed_tick)
     else:
-        battles = get_battles(interval=2000)
+        battles = get_battles(interval=500)
     if not battles:
         logging.warning("Something went wrong accessing the battles API.")
         return
