@@ -9,6 +9,11 @@ app.config.from_envvar('SETTINGS')
 def _setup_logger():
     # Initialize logger once before configuring.
     _ = app.logger
+    if app.config.get("DEBUG_LOGGING"):
+        level = "DEBUG"
+    else:
+        level = "INFO"
+
     logging.config.dictConfig({
         "version": 1,
         "formatters": {
@@ -21,13 +26,13 @@ def _setup_logger():
             "console": {
                 "class": "logging.StreamHandler",
                 "formatter": "brief",
-                "level": "INFO",
+                "level": level,
                 "stream": "ext://sys.stdout"
             },
         },
         "loggers": {
             app.logger_name: {
-                "level": "DEBUG" if app.config.get("DEBUG_LOGGING") else "INFO",
+                "level": level,
                 "handlers": ["console"]
             }
         }
