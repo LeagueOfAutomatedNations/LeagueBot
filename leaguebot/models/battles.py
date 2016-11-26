@@ -5,7 +5,7 @@ from leaguebot.services import screeps, redis_data, redis_queue
 
 def get_battles(since_tick=None, interval=None):
     client = screeps.get_client()
-    return client.battles(sinceTick=since_tick, interval=interval)
+    return client.battles(start=since_tick, interval=interval)
 
 
 def get_nukes():
