@@ -88,7 +88,7 @@ def submit_processed_battle(room_name, battle_info_dict):
     :param battle_info_dict: The processed battle data.
     """
     pipe = redis_data.get_connection().pipeline()
-    pipe.lrem(PROCESSING_QUEUE, -1, room_name)
+    pipe.lrem(PROCESSING_QUEUE, 0, room_name)
     pipe.srem(PROCESSING_QUEUE_SET, room_name)
     pipe.delete(BATTLE_DATA_KEY.format(room_name))
     if 'latest_hostilities_detected' in battle_info_dict:
@@ -136,7 +136,7 @@ def mark_battle_reported(database_key):
     :param database_key: The database_key returned from get_next_battle_to_report corresponding to the battle
                          successfully reported.
     """
-    redis_data.get_connection().lrem(REPORTING_QUEUE, -1, database_key)
+    redis_data.get_connection().lrem(REPORTING_QUEUE, 0, database_key)
 
 
 def requeue_report(reporting_database_key, push_to_twitter, push_to_slack):
@@ -153,7 +153,7 @@ def requeue_report(reporting_database_key, push_to_twitter, push_to_slack):
     """
     pipeline = redis_data.get_connection().pipeline()
     if reporting_database_key:
-        pipeline.lrem(REPORTING_QUEUE, -1, reporting_database_key)
+        pipeline.lrem(REPORTING_QUEUE, 0, reporting_database_key)
     if push_to_twitter:
         pipeline.lpush(TWITTER_QUEUE, push_to_twitter)
     if push_to_slack:
@@ -204,4 +204,4 @@ def finish_reportable_message(reporting_key, message):
     :param reporting_key: SLACK_QUEUE or TWITTER_QUEUE
     :param message: The message to mark finished.
     """
-    redis_data.get_connection().lrem(reporting_key, message, 1)
+    redis_data.get_connection().lrem(reporting_key, 0, message)

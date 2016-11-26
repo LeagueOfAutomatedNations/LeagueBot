@@ -111,7 +111,9 @@ def process_room(room_name, current_tick):
         battle_data['earliest_hostilities_detected'] = battle_data['tick_to_check']
         battle_data['latest_hostilities_detected'] = battle_data['tick_to_check']
         battle_data['earliest_hostilities_collided'] = False
+
         del battle_data['tick_to_check']
+        battle_data['max_tick_checked'] = tick_to_call
 
         # We've found the initial history section, now let's search back as far as we can!
         # We assume that if a history earlier than the history we've already gotten is inaccessible, it will never be
@@ -125,7 +127,6 @@ def process_room(room_name, current_tick):
         logger.debug("Starting search-back loop.")
         while True:
             # TODO: earliest_hostilities_collided check here!
-            battle_data['max_tick_checked'] = tick_to_call
             # We process the result first in here so that we can use the result from the initial tick.
             still_a_battle = modify_data_with_history(battle_data, api_result, checking='earliest')
             if not still_a_battle:
@@ -141,7 +142,7 @@ def process_room(room_name, current_tick):
             logger.debug("Successfully got tick {}".format(tick_to_call))
 
     # At this point, we know that the initial tick has been found. Now we're just continuing to check forward.
-    tick_to_call = battle_data['max_tick_checked']
+    tick_to_call = battle_data['max_tick_checked'] + 20
     found_end = False
     logger.debug("Starting forward search loop.")
     while True:
