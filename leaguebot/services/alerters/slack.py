@@ -1,37 +1,32 @@
-from leaguebot import app
-import leaguebot.models.map as screepmap
-import leaguebot.services.screeps as screeps
-import leaguebot.services.slack as slack
-import re
 import datetime
+
 import pytz
 
+import leaguebot.models.map as screepmap
+from leaguebot import app
+from leaguebot.services import screeps, slack, battle_description
 
-def sendBattleMessage(battleinfo):
-    message = getBattleMessageText(battleinfo)
-    sendToSlack(message)
+
+def sendBattleMessage(battle_data):
+    message = getBattleMessageText(battle_data)
+    return sendToSlack(message)
 
 
-def getBattleMessageText(battleinfo):
-    room_name = battleinfo['_id']
-    room_owner = screepmap.getRoomOwner(room_name)
-    pvp_time = str(battleinfo['lastPvpTime']-20)
-    history_link = '<https://screeps.com/a/#!/history/' + room_name + '?t=' + pvp_time + '|' + pvp_time + '>'
-    message = history_link + ' - Battle: ' + '<https://screeps.com/a/#!/room/' + room_name + '|' + room_name + '>'
-    if not room_owner:
-        return message
+def getBattleMessageText(battle_data):
+    room_name = battle_data['room']
+    pvp_time = battle_data['earliest_hostilities_detected'] - 5
 
-    room_level = screepmap.getRoomLevel(room_name)
-
-    if room_level and room_level > 0:
-        message += ' RCL ' + str(room_level)
-
-    message += ', defender ' + '<https://screeps.com/a/#!/profile/' + room_owner + '|' + room_owner + '>'
-    room_alliance = screepmap.getUserAlliance(room_owner)
-    if room_alliance:
-        message += ' (' + room_alliance + ')'
-
-    return message
+    history_link = "<https://screeps.com/a/#!/history/{0}?t={1}|{0} at {1}>".format(room_name, pvp_time)
+    return "{} - {} tick battle: {} - {}{}".format(
+        " vs ".join(
+            "<https://screeps.com/a/#!/profile/{0}|{0}{1}>"
+                .format(username, " ({})".format(alliance) if alliance is not None else "")
+            for username, alliance in battle_data['alliances'].items()),
+        battle_description.describe_duration(battle_data),
+        battle_description.describe_creeps(battle_data),
+        history_link,
+        " (defender {}, RCL {})".format(battle_data['owner'], battle_data['rcl']) if battle_data.get('rcl') else ""
+    )
 
 
 def sendNukeMessage(nukeinfo):
@@ -69,11 +64,11 @@ def getNukeMessageText(nukeinfo):
 
 def sendToSlack(message):
     if 'SEND_TO_SLACK' not in app.config or not app.config['SEND_TO_SLACK']:
-        return False
+        return True
     try:
         channel = app.config['SLACK_CHANNEL']
-        slack.send_slack_message(channel, message)
-        print (message)
-        return True
+        success = slack.send_slack_message(channel, message)
+        app.logger.info("Sent slack message: {}".format(message))
+        return success
     except:
         return False
