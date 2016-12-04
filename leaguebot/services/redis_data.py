@@ -207,7 +207,11 @@ def get_ongoing_data(room_name):
     :rtype: dict[str, int | list[str] | dict[str, dict[str, str]]]
     """
     key = BATTLE_DATA_KEY.format(room_name)
-    return json.loads(get_connection().get(key).decode())
+    raw = get_connection().get(key)
+    if raw is None:
+        return None
+    else:
+        return json.loads(raw.decode())
 
 
 def is_alliance_data_recent():
