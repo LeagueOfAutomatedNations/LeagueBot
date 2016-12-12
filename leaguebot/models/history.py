@@ -318,14 +318,14 @@ def identify_creep(creep_obj):
         return dismantling_attacker
     elif (ranged or heal or attack) and not carry:
         return general_attacker
+    elif all(x.get('type') == 'move' for x in body):
+        return scout
     elif all(x.get('type') == 'move' or x.get('type') == 'tough' for x in body):
         return tough_attacker
     elif (work or carry or claim) and not heal and not ranged and not attack:
         return civilian
     elif (work or carry or claim) and (heal or ranged or attack):
         return work_and_carry_attacker
-    elif all(x.get('type') == 'move' for x in body):
-        return scout
     else:
         # We're just saying this as info for now since we care about adding new bodytypes to the code.
         logger.info("Couldn't describe creep body: {}".format(body))
