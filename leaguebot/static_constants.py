@@ -48,7 +48,7 @@ KEEP_IN_QUEUE_FOR_MAX_TICKS = 120
 This is the hard deadline where no more history collection will be attempted (if the current tick is this many ticks
 after the last known hostilities (or the first hostilities if no history has been found), give up.)
 """
-KEEP_IN_QUEUE_FOR_MAX_TICKS_UNSUCCESSFUL = 2000
+KEEP_IN_QUEUE_FOR_MAX_TICKS_UNSUCCESSFUL = 200
 
 CHECK_BATTLES_ENDPOINT_EVERY_SECONDS = 15 * 60
 

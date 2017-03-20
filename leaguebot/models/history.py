@@ -94,7 +94,17 @@ def process_room(room_name, current_tick):
             if tick_to_call + KEEP_IN_QUEUE_FOR_MAX_TICKS_UNSUCCESSFUL < current_tick:
                 logger.error("Room {} tick {} data has been unavailable for over {} ticks! Abandoning."
                              .format(room_name, tick_to_call, KEEP_IN_QUEUE_FOR_MAX_TICKS_UNSUCCESSFUL))
-                return {}
+                return {
+                    'max_tick_checked': battle_data['tick_to_check'],
+                    'player_creep_counts': {},
+                    'alliances': {},
+                    'room': room_name,
+                    'owner': None,
+                    'rcl': 0,
+                    'earliest_hostilities_detected': battle_data['tick_to_check'],
+                    'latest_hostilities_detected': battle_data['tick_to_check'] + 1,
+                    'duration': 1,
+                }
             else:
                 return None
 
