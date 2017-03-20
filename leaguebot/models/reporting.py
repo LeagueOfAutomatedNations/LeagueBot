@@ -8,18 +8,18 @@ from leaguebot.static_constants import civilian, scout, SLACK_QUEUE, TWITTER_QUE
 
 def should_report(battle_info):
     # Don't report a single player dismantling their own things
-    if len(battle_info['player_creep_counts']) < 2:
-        return False
+    #if len(battle_info['player_creep_counts']) < 2:
+    #    return False
 
     # Don't report on short battles.
-    if 'duration' in battle_info:
-        if battle_info['duration'] < 10:
-            return False
+    #if 'duration' in battle_info:
+    #    if battle_info['duration'] < 10:
+    #        return False
 
     # Don't report a single civilian or scout walking into someone's owned room and being shot down
-    if not any(any(role != civilian and role != scout for role in creeps.keys())
-               for player, creeps in battle_info['player_creep_counts'].items() if battle_info.get('owner') != player):
-        return False
+    #if not any(any(role != civilian and role != scout for role in creeps.keys())
+    #           for player, creeps in battle_info['player_creep_counts'].items() if battle_info.get('owner') != player):
+    #    return False
     return True
 
 
